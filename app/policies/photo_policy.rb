@@ -7,9 +7,7 @@ class PhotoPolicy < ApplicationPolicy
   end
 
   def show?
-    @photo.owner == current_user ||
-      !@photo.owner.private? ||
-      @photo.owner.followers.include?(current_user)
+    @photo.owner == user || !@photo.owner.private? || @photo.owner.followers.include?(user)
   end
 
   def create?
@@ -21,7 +19,7 @@ class PhotoPolicy < ApplicationPolicy
   end
 
   def update?
-    @photo.owner == current_user
+    @photo.owner == user
   end
 
   def edit?
@@ -29,12 +27,12 @@ class PhotoPolicy < ApplicationPolicy
   end
 
   def destroy?
-    @photo.owner == current_user
+    @photo.owner == user
   end
 
   class Scope < Scope
     def resolve
-      scope.joins(:owner).where("users.private = ? OR users.id = ? OR users.id IN (?)", false, user.id, user.leaders)
+      scope.joins(:owner).where("users.private = ? OR users.id = ? OR users.id IN (?)", false, user.id, user.leaders.pluck(:id))
     end
   end
 end

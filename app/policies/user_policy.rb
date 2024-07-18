@@ -2,7 +2,7 @@ class UserPolicy < ApplicationPolicy
   # attr_reader :user, :record
 
   def show?
-    !record.private? || user == record || user.followers.include?(user)
+    true
   end
 
   def create?
@@ -14,7 +14,7 @@ class UserPolicy < ApplicationPolicy
   end
 
   def update?
-    user == current_user || user.admin?
+    user == record
   end
 
   def edit?
@@ -22,7 +22,7 @@ class UserPolicy < ApplicationPolicy
   end
 
   def destroy?
-    user == current_user || user.admin?
+    user == record
   end
 
   def feed?
@@ -31,6 +31,14 @@ class UserPolicy < ApplicationPolicy
 
   def discover?
     true
+  end
+  
+  def view_photos?
+    !record.private? || user == record || record.followers.include?(user)
+  end
+
+  def liked?   
+    !record.private? || user == record || record.followers.include?(user)
   end
 
   class Scope < Scope
