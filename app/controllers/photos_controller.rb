@@ -1,30 +1,17 @@
 class PhotosController < ApplicationController
   before_action :set_photo, only: %i[ show edit update destroy ]
   before_action :ensure_current_user_is_owner, only: [:destroy, :update, :edit]
-
-  # GET /photos or /photos.json
-  def index
-    @photos = Photo.all
-  end
-
-  # GET /photos/1 or /photos/1.json
-  def show
-  end
+  before_action { authorize @photo || Photo }
 
   # GET /photos/new
   def new
     @photo = Photo.new
   end
 
-  # GET /photos/1/edit
-  def edit
-  end
-
   # POST /photos or /photos.json
   def create
     @photo = Photo.new(photo_params)
     @photo.owner = current_user
-
     respond_to do |format|
       if @photo.save
         format.html { redirect_to @photo, notice: "Photo was successfully created." }
@@ -51,12 +38,10 @@ class PhotosController < ApplicationController
 
   # DELETE /photos/1 or /photos/1.json
   def destroy
-    if current_user == @photo.owner
-      @photo.destroy
-      respond_to do |format|
-        format.html { redirect_back fallback_location: root_url, notice: "Photo was successfully destroyed." }
-        format.json { head :no_content }
-      end
+    @photo.destroy
+    respond_to do |format|
+      format.html { redirect_back_or_to "/#{@photo.owner.id}", notice: "Photo was successfully destroyed." }
+      format.json { head :no_content }
     end
   end
 
@@ -68,8 +53,8 @@ class PhotosController < ApplicationController
   end
 
   def ensure_current_user_is_owner
-    if current_user != @photo.owner
-      redirect_back fallback_location: root_url, alert: "You're not authorized for that."
+    if !PhotoPolicy.new(current_user, @photo).show?
+      raise Pundit::NotAuthorizedError, "You're not authorized for that."
     end
   end
 
