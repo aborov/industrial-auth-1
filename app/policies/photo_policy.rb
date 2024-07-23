@@ -1,13 +1,7 @@
 class PhotoPolicy < ApplicationPolicy
-  attr_reader :user, :photo
-
-  def initialize(user, photo)
-    @user = user
-    @photo = photo
-  end
 
   def show?
-    @photo.owner == user || !@photo.owner.private? || @photo.owner.followers.include?(user)
+    user == record.owner || !record.owner.private? || record.owner.followers.include?(user)
   end
 
   def create?
@@ -19,7 +13,7 @@ class PhotoPolicy < ApplicationPolicy
   end
 
   def update?
-    @photo.owner == user
+    user == record.owner
   end
 
   def edit?
@@ -27,12 +21,7 @@ class PhotoPolicy < ApplicationPolicy
   end
 
   def destroy?
-    @photo.owner == user
+    update?
   end
-
-  class Scope < Scope
-    def resolve
-      scope.joins(:owner).where("users.private = ? OR users.id = ? OR users.id IN (?)", false, user.id, user.leaders.pluck(:id))
-    end
-  end
+  
 end

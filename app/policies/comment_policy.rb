@@ -1,4 +1,5 @@
 class CommentPolicy < ApplicationPolicy
+
   def create?
     photo = Photo.find(record.photo_id)
     user == photo.owner || !photo.owner.private? || photo.owner.followers.include?(user)
@@ -9,12 +10,6 @@ class CommentPolicy < ApplicationPolicy
   end
 
   def destroy?
-    user == record.author
-  end
-
-  class Scope < Scope
-    def resolve
-      scope.all
-    end
+    update?
   end
 end

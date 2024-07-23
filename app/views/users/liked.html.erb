@@ -10,9 +10,6 @@
   </div>
 </div>
 
-<% if @liked_photos_private %>
-  <p class="text-center">This user's liked photos are private.</p>
-<% else %>
   <% @liked_photos.each do |photo| %>
     <div class="row mb-4">
       <div class="col-md-6 offset-md-3">
